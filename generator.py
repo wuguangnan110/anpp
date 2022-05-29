@@ -159,7 +159,7 @@ with open(out_file_path, 'w', encoding = 'utf-8') as f_out:
 
 				f_out.write("alias anpp=\"project_product\"   # just for project_product function alias\n")
 				f_out.write("# custom shell alias cmds\n")
-				for alias in config["aliass"]:
+				for alias in config["alias"]:
 					alias_cmd = "alias " + alias["cmd"] + "=\"" + alias["shell"] + "\"\n"
 					f_out.write(alias_cmd)
 
