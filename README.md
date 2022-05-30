@@ -155,3 +155,112 @@ NO. | 命令名 | 说明
 # 六、自定义别名
 
 [config.json](config.json)中的`alias`字段用于自定义shell alias
+
+# 七、添加历程
+
+* project内增加一条命令`pax`，alias自定义一条linux命令:
+
+```diff
+--- a/config.json
++++ b/config.json
+@@ -2,7 +2,7 @@
+        /**
+         * defaultPath: 默认路径，用于存放所有项目的根目录，所有的目录跳转基于该目录
+         */
+-       "defaultPath": "~/zengjf",
++       "defaultPath": "~",
+        /**
+         * project支持的key，这里相当于是定义，后面projects数组中的每个project相当于赋值，
+         * 定义了不一定要赋值，没赋值会被'.'(目录)替换
+@@ -16,7 +16,8 @@
+                "bootloaderStage2",
+                "out",
+                "efuse",
+-               "camera"
++               "camera",
++               "pax"
+        ],
+        /**
+         * project数组，每个project可以包含project_keys数组中的字段，不一定需要完全包含
+@@ -44,14 +45,15 @@
+                },
+                {
+                        "project": "M8-project",
+-                       "product": "k62v1_64",
++                       "product": "k62v1_64_pax",
+                        "kernel": "kernel-4.19",
+                        "dts": "arch/arm64/boot/dts/mediatek/",
+                        "bootloaderStage1": "vendor/mediatek/proprietary/bootable/bootloader/preloader",
+                        "bootloaderStage2": "vendor/mediatek/proprietary/bootable/bootloader/lk",
+                        "out": "out/target/product",
+                        "camera": "camera",
+-                       "efuse": "vendor/mediatek/proprietary/scripts/sign-image_v2"
++                       "efuse": "vendor/mediatek/proprietary/scripts/sign-image_v2",
++                       "pax": "paxdroid"
+                },
+                {
+                        "project": "L00-project",
+@@ -133,6 +135,14 @@
+                                "project",
+                                "camera"
+                        ]
++               },
++               {
++                       "cmd": "pax",
++                       "combine":[
++                               "defaultPath",
++                               "project",
++                               "pax"
++                       ]
+                }
+        ],
+        "alias": [
+@@ -143,6 +153,10 @@
+                {
+                        "cmd": "ls1",
+                        "shell": "ls -1"
++               },
++               {
++                       "cmd": "build",
++                       "shell": "./selfbuild"
+                }
+        ]
+ }
+```
+
+* `anppc vim`或者`anppc tmux`是将custom自定义的vimrc、tmux属性导入到用户home下.vimrc、tmux.conf文件，定制一条test配置如下：
+
+```
+--- a/custom.sh
++++ b/custom.sh
+@@ -60,6 +60,32 @@ bind-key h select-pane -L
+ unbind-key l
+ bind-key l select-pane -R
+
++unbind '"'
++bind - splitw -v -c '#{pane_current_path}'
++unbind %
++bind | splitw -h -c '#{pane_current_path}'
++# ANPP CONFIG END
++EOF
++
++    elif [ $# -eq 1 ] && [ $1 == "test" ]; then
++        tmux_anpp_config_start=`grep "ANPP CONFIG START" ~/.test.conf`
++        tmux_anpp_config_end=`grep "ANPP CONFIG END" ~/.test.conf`
++        if [ -z "${tmux_anpp_config_start}" ] && [ -z "${tmux_anpp_config_end}" ]; then
++            cat <<EOF >> ~/.test.conf
++# ANPP CONFIG START
++set -g default-terminal "screen-256color"
++set -g history-limit 10000
++
++# Use Alt-arrow keys to switch panes
++unbind-key j
++bind-key j select-pane -D
++unbind-key k
++bind-key k select-pane -U
++unbind-key h
++bind-key h select-pane -L
++unbind-key l
++bind-key l select-pane -R
++
+```
